@@ -15,7 +15,7 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	extract( apply_filters( 'wp_mail', compact( 'to', 'subject', 'message', 'headers', 'attachments' ) ) );
 
 	// Get the site domain and get rid of www.
-	$sitename = strtolower( $_SERVER['SERVER_NAME'] );
+	$sitename = strtolower( parse_url( site_url(), PHP_URL_HOST ) );
 	if ( substr( $sitename, 0, 4 ) == 'www.' ) {
 		$sitename = substr( $sitename, 4 );
 	}
