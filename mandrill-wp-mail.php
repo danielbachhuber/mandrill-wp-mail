@@ -28,7 +28,7 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		'html'                       => $message,
 		'to'                         => $to,
 		'headers'                    => array(
-			'Content-type'           => 'text/plain',
+			'Content-type'           => apply_filters( 'wp_mail_content_type', 'text/plain' ),
 			),
 
 		// Mandrill defaults
