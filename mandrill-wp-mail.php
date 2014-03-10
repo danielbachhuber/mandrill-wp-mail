@@ -15,7 +15,7 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	extract( apply_filters( 'wp_mail', compact( 'to', 'subject', 'message', 'headers', 'attachments' ) ) );
 
 	// Get the site domain and get rid of www.
-	$sitename = strtolower( $_SERVER['SERVER_NAME'] );
+	$sitename = strtolower( parse_url( site_url(), PHP_URL_HOST ) );
 	if ( substr( $sitename, 0, 4 ) == 'www.' ) {
 		$sitename = substr( $sitename, 4 );
 	}
@@ -27,6 +27,9 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		'subject'                    => $subject,
 		'html'                       => $message,
 		'to'                         => $to,
+		'headers'                    => array(
+			'Content-type'           => apply_filters( 'wp_mail_content_type', 'text/plain' ),
+			),
 
 		// Mandrill defaults
 		'tags'                       => array(
@@ -62,7 +65,6 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	/**
 	 * Check whether there are custom headers to be sent
 	 */
-	$message_args['headers'] = array();
 	if ( ! empty( $headers ) ) {
 
 		// Prepare the passed headers
@@ -155,6 +157,14 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	$message_args['to'] = $processed_to;
 
 	/**
+	 * Make sure our templates end up as HTML
+	 */
+	if ( ! empty( $message_args['headers']['Content-type'] )
+		&& strtolower( $message_args['headers']['Content-type'] ) == 'text/plain' ) {
+		$message_args['html'] = wpautop( $message_args['html'] );
+	}
+
+	/**
 	 * Default filters we should still apply
 	 */
 	$message_args['from_email'] = apply_filters( 'wp_mail_from', $message_args['from_email'] );
@@ -176,5 +186,5 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		return false;
 	}
 
-	return false;
+	return true;
 }
