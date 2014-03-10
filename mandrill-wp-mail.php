@@ -27,6 +27,9 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		'subject'                    => $subject,
 		'html'                       => $message,
 		'to'                         => $to,
+		'headers'                    => array(
+			'Content-type'           => 'text/plain',
+			),
 
 		// Mandrill defaults
 		'tags'                       => array(
@@ -62,7 +65,6 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	/**
 	 * Check whether there are custom headers to be sent
 	 */
-	$message_args['headers'] = array();
 	if ( ! empty( $headers ) ) {
 
 		// Prepare the passed headers
@@ -153,6 +155,14 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		}
 	}
 	$message_args['to'] = $processed_to;
+
+	/**
+	 * Make sure our templates end up as HTML
+	 */
+	if ( ! empty( $message_args['headers']['Content-type'] )
+		&& strtolower( $message_args['headers']['Content-type'] ) == 'text/plain' ) {
+		$message_args['html'] = wpautop( $message_args['html'] );
+	}
 
 	/**
 	 * Default filters we should still apply
