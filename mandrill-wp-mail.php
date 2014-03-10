@@ -176,5 +176,5 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		return false;
 	}
 
-	return false;
+	return true;
 }
