@@ -130,6 +130,11 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 							$message_args['important'] = ( strpos(strtolower($content),'high') !== false ) ? true : false;
 						}
 						break;
+					case 'content-type':
+
+						$message_args['headers']['Content-type'] = trim( $content );
+						break;
+
 					default:
 						if ( substr($name,0,2) == 'x-' ) {
 							$message_args['headers'][trim( $name )] = trim( $content );
