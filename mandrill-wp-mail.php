@@ -185,7 +185,7 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 			)
 		);
 
-	$request_url = 'https://mandrillapp.com/api/1.0/messages/send';
+	$request_url = 'https://mandrillapp.com/api/1.0/messages/send.json';
 	$response = wp_remote_post( $request_url, $request_args );
 	if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 		return false;
