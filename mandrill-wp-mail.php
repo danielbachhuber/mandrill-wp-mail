@@ -1,11 +1,11 @@
 <?php
 /**
  * wp_mail() drop-in for Mandrill
- * 
+ *
  * ... because sometimes you don't need an entire plugin
- * 
+ *
  * Cribbed in part from wpMandrill
- * 
+ *
  * @todo support for attachments
  */
 
@@ -16,7 +16,7 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 
 	// Get the site domain and get rid of www.
 	$sitename = strtolower( parse_url( site_url(), PHP_URL_HOST ) );
-	if ( substr( $sitename, 0, 4 ) == 'www.' ) {
+	if ( 'www.' === substr( $sitename, 0, 4 ) ) {
 		$sitename = substr( $sitename, 4 );
 	}
 
@@ -29,18 +29,18 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		'to'                         => $to,
 		'headers'                    => array(
 			'Content-type'           => apply_filters( 'wp_mail_content_type', 'text/plain' ),
-			),
+		),
 
 		// Mandrill defaults
 		'tags'                       => array(
 			'user'                   => array(),
 			'general'                => array(),
 			'automatic'              => array(),
-			), 
-		'from_name'                  => 'WordPress', 
-		'from_email'                 => $from_email, 
-		'template_name'              => '', 
-		'track_opens'                => null, 
+		),
+		'from_name'                  => 'WordPress',
+		'from_email'                 => $from_email,
+		'template_name'              => '',
+		'track_opens'                => null,
 		'track_clicks'               => null,
 		'url_strip_qs'               => false,
 		'merge'                      => true,
@@ -59,7 +59,7 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		'subaccount'                 => null,
 		'recipient_metadata'         => null,
 		'auto_text'                  => true,
-		);
+	);
 	$message_args = apply_filters( 'mandrill_wp_mail_pre_message_args', $message_args );
 
 	/**
@@ -67,18 +67,18 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	 */
 	if ( ! empty( $headers ) ) {
 
+		$tempheaders = $headers;
+
 		// Prepare the passed headers
 		if ( ! is_array( $headers ) ) {
 			$tempheaders = explode( "\n", str_replace( "\r\n", "\n", $headers ) );
-		} else {
-			$tempheaders = $headers;
 		}
 
 		if ( ! empty( $tempheaders ) ) {
-			
+
 			foreach ( (array) $tempheaders as $header ) {
 
-				if ( strpos( $header, ':' ) === false ) {
+				if ( false === strpos( $header, ':' ) ) {
 					continue;
 				}
 
@@ -86,11 +86,11 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 				list( $name, $content ) = explode( ':', trim( $header ), 2 );
 
 				// Cleanup crew
-				$name    = trim( $name    );
+				$name    = trim( $name );
 				$content = trim( $content );
 
 				switch ( strtolower( $name ) ) {
-					
+
 					case 'from':
 
 						if ( false !== strpos( $content, '<' ) ) {
@@ -106,28 +106,28 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 							$from_name  = '';
 							$from_email = trim( $content );
 						}
-					
+
 						$message_args['from_email']  = $from_email;
-						$message_args['from_name']   = $from_name;		            
+						$message_args['from_name']   = $from_name;
 						break;
-					
+
 					case 'bcc':
 
 						// TODO: Mandrill's API only accept one BCC address. Other addresses will be silently discarded
 						$bcc = array_merge( (array) $bcc, explode( ',', $content ) );
 						$message_args['bcc_address'] = $bcc[0];
 						break;
-						
+
 					case 'reply-to':
 
-						$message_args['headers'][trim( $name )] = trim( $content );
+						$message_args['headers'][ trim( $name ) ] = trim( $content );
 						break;
 
 					case 'importance':
 					case 'x-priority':
 					case 'x-msmail-priority':
 						if ( ! $message_args['important'] ) {
-							$message_args['important'] = ( strpos(strtolower($content),'high') !== false ) ? true : false;
+							$message_args['important'] = ( strpos( strtolower( $content ), 'high' ) !== false ) ? true : false;
 						}
 						break;
 					case 'content-type':
@@ -136,8 +136,8 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 						break;
 
 					default:
-						if ( substr($name,0,2) == 'x-' ) {
-							$message_args['headers'][trim( $name )] = trim( $content );
+						if ( 'x-' === substr( $name,0 ,2 ) ) {
+							$message_args['headers'][ trim( $name ) ] = trim( $content );
 						}
 						break;
 				}
@@ -148,14 +148,14 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	/**
 	 * Sneaky support for multiple to addresses
 	 */
-	if ( ! is_array( $message_args['to'] ) ) { 
+	if ( ! is_array( $message_args['to'] ) ) {
 		$message_args['to'] = explode( ',', $message_args['to'] );
 	}
 	$processed_to = array();
 	foreach ( $message_args['to'] as $email ) {
 		if ( is_array( $email ) ) {
 			$processed_to[] = $email;
-		} else { 
+		} else {
 			$processed_to[] = array( 'email' => $email );
 		}
 	}
@@ -164,8 +164,7 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	/**
 	 * Make sure our templates end up as HTML
 	 */
-	if ( ! empty( $message_args['headers']['Content-type'] )
-		&& strtolower( $message_args['headers']['Content-type'] ) == 'text/plain' ) {
+	if ( ! empty( $message_args['headers']['Content-type'] ) && 'text/plain' === strtolower( $message_args['headers']['Content-type'] ) ) {
 		$message_args['html'] = wpautop( $message_args['html'] );
 	}
 
@@ -180,10 +179,10 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 
 	$request_args = array(
 		'body' => array(
-				'message' => $message_args,
-				'key'     => MANDRILL_API_KEY,
-			)
-		);
+			'message' => $message_args,
+			'key'     => MANDRILL_API_KEY,
+		)
+	);
 
 	$request_url = 'https://mandrillapp.com/api/1.0/messages/send.json';
 	$response = wp_remote_post( $request_url, $request_args );
