@@ -84,119 +84,34 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	);
 	$message_args = apply_filters( 'mandrill_wp_mail_pre_message_args', $message_args );
 
-	/**
-	 * Check whether there are custom headers to be sent
-	 */
+	// Set up message headers if we have any to send.
 	if ( ! empty( $headers ) ) {
-
-		$tempheaders = $headers;
-
-		// Prepare the passed headers
-		if ( ! is_array( $headers ) ) {
-			$tempheaders = explode( "\n", str_replace( "\r\n", "\n", $headers ) );
-		}
-
-		if ( ! empty( $tempheaders ) ) {
-
-			foreach ( (array) $tempheaders as $header ) {
-
-				if ( false === strpos( $header, ':' ) ) {
-					continue;
-				}
-
-				// Explode them out
-				list( $name, $content ) = explode( ':', trim( $header ), 2 );
-
-				// Cleanup crew
-				$name    = trim( $name );
-				$content = trim( $content );
-
-				switch ( strtolower( $name ) ) {
-
-					case 'from':
-
-						if ( false !== strpos( $content, '<' ) ) {
-							// So... making my life hard again?
-							$from_name = substr( $content, 0, strpos( $content, '<' ) - 1 );
-							$from_name = str_replace( '"', '', $from_name );
-							$from_name = trim( $from_name );
-
-							$from_email = substr( $content, strpos( $content, '<' ) + 1 );
-							$from_email = str_replace( '>', '', $from_email );
-							$from_email = trim( $from_email );
-						} else {
-							$from_name  = '';
-							$from_email = trim( $content );
-						}
-
-						$message_args['from_email']  = $from_email;
-						$message_args['from_name']   = $from_name;
-						break;
-
-					case 'bcc':
-
-						// TODO: Mandrill's API only accept one BCC address. Other addresses will be silently discarded
-						$bcc = array_merge( (array) $bcc, explode( ',', $content ) );
-						$message_args['bcc_address'] = $bcc[0];
-						break;
-
-					case 'reply-to':
-
-						$message_args['headers'][ trim( $name ) ] = trim( $content );
-						break;
-
-					case 'importance':
-					case 'x-priority':
-					case 'x-msmail-priority':
-						if ( ! $message_args['important'] ) {
-							$message_args['important'] = ( strpos( strtolower( $content ), 'high' ) !== false ) ? true : false;
-						}
-						break;
-					case 'content-type':
-
-						$message_args['headers']['Content-type'] = trim( $content );
-						break;
-
-					default:
-						if ( 'x-' === substr( $name,0 ,2 ) ) {
-							$message_args['headers'][ trim( $name ) ] = trim( $content );
-						}
-						break;
-				}
-			}
-		}
+		$message_args = _mandrill_wp_mail_headers( $headers, $message_args );
 	}
 
-	/**
-	 * Sneaky support for multiple to addresses
-	 */
+	 // Sneaky support for multiple to addresses.
 	if ( ! is_array( $message_args['to'] ) ) {
 		$message_args['to'] = explode( ',', $message_args['to'] );
 	}
 	$processed_to = array();
 	foreach ( $message_args['to'] as $email ) {
+		$processed_to[] = array( 'email' => $email );
 		if ( is_array( $email ) ) {
 			$processed_to[] = $email;
-		} else {
-			$processed_to[] = array( 'email' => $email );
 		}
 	}
 	$message_args['to'] = $processed_to;
 
-	/**
-	 * Make sure our templates end up as HTML
-	 */
+	 // Make sure our templates end up as HTML.
 	if ( ! empty( $message_args['headers']['Content-type'] ) && 'text/plain' === strtolower( $message_args['headers']['Content-type'] ) ) {
 		$message_args['html'] = wpautop( $message_args['html'] );
 	}
 
-	/**
-	 * Default filters we should still apply
-	 */
+	// Default filters we should still apply.
 	$message_args['from_email'] = apply_filters( 'wp_mail_from', $message_args['from_email'] );
-	$message_args['from_name'] = apply_filters( 'wp_mail_from_name', $message_args['from_name'] );
+	$message_args['from_name']  = apply_filters( 'wp_mail_from_name', $message_args['from_name'] );
 
-	// Allow user to override
+	// Allow user to override message args before they're sent to Mandrill.
 	$message_args = apply_filters( 'mandrill_wp_mail_message_args', $message_args );
 
 	$request_args = array(
@@ -213,4 +128,96 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	}
 
 	return true;
+}
+
+/**
+ * Handle email headers before they're sent to the Mandrill API.
+ *
+ * @since  0.0.2
+ * @access private
+ * @todo   Improve BCC handling
+ * @param  mixed $headers
+ * @param  array $message_args
+ * @return array $message_args
+ */
+function _mandrill_wp_mail_headers( $headers, $message_args ) {
+	if ( ! is_array( $message_args ) ) {
+		return $message_args;
+	}
+
+	$tempheaders = $headers;
+
+	// Prepare the passed headers.
+	if ( ! is_array( $headers ) ) {
+		$tempheaders = explode( "\n", str_replace( "\r\n", "\n", $headers ) );
+	}
+
+	// Bail if we don't have any headers to work with.
+	if ( empty( $tempheaders ) ) {
+		return $message_args;
+	}
+
+	foreach ( (array) $tempheaders as $header ) {
+
+		if ( false === strpos( $header, ':' ) ) {
+			continue;
+		}
+
+		// Explode them out
+		list( $name, $content ) = explode( ':', trim( $header ), 2 );
+
+		// Cleanup crew
+		$name    = trim( $name );
+		$content = trim( $content );
+
+		switch ( strtolower( $name ) ) {
+
+			case 'from':
+				$from_name  = '';
+				$from_email = trim( $content );
+				if ( false !== strpos( $content, '<' ) ) {
+					// So... making my life hard again?
+					$from_name = substr( $content, 0, strpos( $content, '<' ) - 1 );
+					$from_name = str_replace( '"', '', $from_name );
+					$from_name = trim( $from_name );
+
+					$from_email = substr( $content, strpos( $content, '<' ) + 1 );
+					$from_email = str_replace( '>', '', $from_email );
+					$from_email = trim( $from_email );
+				}
+
+				$message_args['from_email'] = $from_email;
+				$message_args['from_name']  = $from_name;
+			break;
+
+			case 'bcc':
+				// TODO: Mandrill's API only accept one BCC address. Other addresses will be silently discarded
+				$bcc = array_merge( (array) $bcc, explode( ',', $content ) );
+				$message_args['bcc_address'] = $bcc[0];
+			break;
+
+			case 'reply-to':
+				$message_args['headers'][ trim( $name ) ] = trim( $content );
+			break;
+
+			case 'importance':
+			case 'x-priority':
+			case 'x-msmail-priority':
+				if ( ! $message_args['important'] ) {
+					$message_args['important'] = ( strpos( strtolower( $content ), 'high' ) !== false ) ? true : false;
+				}
+			break;
+
+			case 'content-type':
+				$message_args['headers']['Content-type'] = trim( $content );
+			break;
+
+			default:
+				if ( 'x-' === substr( $name,0 ,2 ) ) {
+					$message_args['headers'][ trim( $name ) ] = trim( $content );
+				}
+			break;
+		}
+	}
+	return apply_filters( 'mandrill_wp_mail_headers', $message_args );
 }
