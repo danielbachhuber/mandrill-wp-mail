@@ -1,5 +1,16 @@
 <?php
 /**
+ * Plugin Name:  Mandrill wp_mail Drop-In
+ * Plugin URI:   https://github.com/danielbachhuber/mandrill-wp-mail
+ * Description:  Drop-in replacement for wp_mail using the Mandrill API.
+ * Version:      0.0.1
+ * Author:       Daniel Bachhuber
+ * Author URI:   https://github.com/danielbachhuber
+ * License:      GPL-2.0+
+ * License URI:  http://www.gnu.org/licenses/gpl-2.0.html
+ */
+
+/**
  * wp_mail() drop-in for Mandrill
  *
  * ... because sometimes you don't need an entire plugin
