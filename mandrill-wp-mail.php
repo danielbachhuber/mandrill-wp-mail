@@ -172,8 +172,8 @@ function _mandrill_wp_mail_headers( $headers, $message_args ) {
 		switch ( strtolower( $name ) ) {
 
 			case 'from':
-				$from_name  = '';
 				$from_email = trim( $content );
+
 				if ( false !== strpos( $content, '<' ) ) {
 					// So... making my life hard again?
 					$from_name = substr( $content, 0, strpos( $content, '<' ) - 1 );
@@ -183,10 +183,11 @@ function _mandrill_wp_mail_headers( $headers, $message_args ) {
 					$from_email = substr( $content, strpos( $content, '<' ) + 1 );
 					$from_email = str_replace( '>', '', $from_email );
 					$from_email = trim( $from_email );
+
+					$message_args['from_name'] = $from_name;
 				}
 
 				$message_args['from_email'] = $from_email;
-				$message_args['from_name']  = $from_name;
 			break;
 
 			case 'bcc':
@@ -212,7 +213,7 @@ function _mandrill_wp_mail_headers( $headers, $message_args ) {
 			break;
 
 			default:
-				if ( 'x-' === substr( $name,0 ,2 ) ) {
+				if ( 'x-' === substr( $name, 0, 2 ) ) {
 					$message_args['headers'][ trim( $name ) ] = trim( $content );
 				}
 			break;
