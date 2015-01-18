@@ -28,6 +28,10 @@
  * @return bool true if mail has been sent, false if it failed
  */
 function wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
+	// Return early if our API key hasn't been defined.
+	if ( ! defined( 'MANDRILL_API_KEY' ) ) {
+		return false;
+	}
 
 	// Compact the input, apply the filters, and extract them back out
 	extract( apply_filters( 'wp_mail', compact( 'to', 'subject', 'message', 'headers', 'attachments' ) ) );
