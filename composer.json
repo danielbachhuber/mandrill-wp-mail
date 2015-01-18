@@ -1,0 +1,19 @@
+{
+  "name" : "danielbachhuber/mandrill-wp-mail",
+  "description" : "wp_mail() drop-in for Mandrill",
+  "keywords" : ["wordpress"],
+  "homepage" : "https://github.com/danielbachhuber/mandrill-wp-mail",
+  "license" : "GPL-2.0+",
+  "type" : "wordpress-muplugin",
+  "authors" : [
+    {
+      "name" : "Daniel Bachhuber",
+      "email" : "d@danielbachhuber.com",
+      "homepage" : "http://danielbachhuber.com",
+      "role" : "Developer"
+    }
+  ],
+  "require" : {
+      "composer/installers" : "~1.0"
+  }
+}
