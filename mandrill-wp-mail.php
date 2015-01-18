@@ -94,10 +94,11 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		$message_args['to'] = explode( ',', $message_args['to'] );
 	}
 	$processed_to = array();
-	foreach ( $message_args['to'] as $email ) {
-		$processed_to[] = array( 'email' => $email );
+	foreach ( (array) $message_args['to'] as $email ) {
 		if ( is_array( $email ) ) {
 			$processed_to[] = $email;
+		} else {
+			$processed_to[] = array( 'email' => $email );
 		}
 	}
 	$message_args['to'] = $processed_to;
