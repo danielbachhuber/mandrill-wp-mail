@@ -145,19 +145,17 @@ function _mandrill_wp_mail_headers( $headers, $message_args ) {
 		return $message_args;
 	}
 
-	$tempheaders = $headers;
-
 	// Prepare the passed headers.
 	if ( ! is_array( $headers ) ) {
-		$tempheaders = explode( "\n", str_replace( "\r\n", "\n", $headers ) );
+		$headers = explode( "\n", str_replace( "\r\n", "\n", $headers ) );
 	}
 
 	// Bail if we don't have any headers to work with.
-	if ( empty( $tempheaders ) ) {
+	if ( empty( $headers ) ) {
 		return $message_args;
 	}
 
-	foreach ( (array) $tempheaders as $header ) {
+	foreach ( (array) $headers as $header ) {
 
 		if ( false === strpos( $header, ':' ) ) {
 			continue;
