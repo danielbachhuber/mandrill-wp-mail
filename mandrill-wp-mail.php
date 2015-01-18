@@ -11,15 +11,22 @@
  */
 
 /**
- * wp_mail() drop-in for Mandrill
+ * Override WordPress' default wp_mail function with one that sends email
+ * using Mandrill's API.
  *
- * ... because sometimes you don't need an entire plugin
+ * Note that this function requires the MANDRILL_API_KEY constant to be defined
+ * in order for it to work. The easiest place to define this is in wp-config.
  *
- * Cribbed in part from wpMandrill
- *
- * @todo support for attachments
+ * @since  0.0.1
+ * @access public
+ * @todo   Add support for attachments
+ * @param  string $to
+ * @param  string $subject
+ * @param  string $message
+ * @param  mixed $headers
+ * @param  array $attachments
+ * @return bool true if mail has been sent, false if it failed
  */
-
 function wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
 
 	// Compact the input, apply the filters, and extract them back out
