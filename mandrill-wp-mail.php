@@ -192,10 +192,28 @@ function _mandrill_wp_mail_headers( $headers, $message_args ) {
 				$message_args['from_email'] = $from_email;
 			break;
 
+			case 'cc':
+				$cc = array_merge( (array) $cc, explode( ',', $content ) );
+				$processed_cc = array();
+				foreach ( (array) $cc as $email ) {
+					$processed_cc[] = array(
+						'email' => trim( $email ),
+						'type'  => 'cc',
+					);
+				}
+				$message_args['to'] = array_merge( $message_args['to'], $processed_cc );
+			break;
+
 			case 'bcc':
-				// TODO: Mandrill's API only accept one BCC address. Other addresses will be silently discarded
 				$bcc = array_merge( (array) $bcc, explode( ',', $content ) );
-				$message_args['bcc_address'] = $bcc[0];
+				$processed_bcc = array();
+				foreach ( (array) $bcc as $email ) {
+					$processed_bcc[] = array(
+						'email' => trim( $email ),
+						'type'  => 'bcc',
+					);
+				}
+				$message_args['to'] = array_merge( $message_args['to'], $processed_bcc );
 			break;
 
 			case 'reply-to':
