@@ -84,15 +84,12 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	);
 	$message_args = apply_filters( 'mandrill_wp_mail_pre_message_args', $message_args );
 
-	// Set up message headers if we have any to send.
-	if ( ! empty( $headers ) ) {
-		$message_args = _mandrill_wp_mail_headers( $headers, $message_args );
-	}
-
-	 // Sneaky support for multiple to addresses.
+	// Make sure our to value is an array so we can manipulate it for the API.
 	if ( ! is_array( $message_args['to'] ) ) {
 		$message_args['to'] = explode( ',', $message_args['to'] );
 	}
+
+	 // Sneaky support for multiple to addresses.
 	$processed_to = array();
 	foreach ( (array) $message_args['to'] as $email ) {
 		if ( is_array( $email ) ) {
@@ -103,7 +100,12 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	}
 	$message_args['to'] = $processed_to;
 
-	 // Make sure our templates end up as HTML.
+	// Set up message headers if we have any to send.
+	if ( ! empty( $headers ) ) {
+		$message_args = _mandrill_wp_mail_headers( $headers, $message_args );
+	}
+
+	// Make sure our templates end up as HTML.
 	if ( ! empty( $message_args['headers']['Content-type'] ) && 'text/plain' === strtolower( $message_args['headers']['Content-type'] ) ) {
 		$message_args['html'] = wpautop( $message_args['html'] );
 	}
