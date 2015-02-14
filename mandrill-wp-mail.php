@@ -193,7 +193,7 @@ function _mandrill_wp_mail_headers( $headers, $message_args ) {
 			break;
 
 			case 'cc':
-				$cc = array_merge( (array) $cc, explode( ',', $content ) );
+				$cc           = explode( ',', $content );
 				$processed_cc = array();
 				foreach ( (array) $cc as $email ) {
 					$processed_cc[] = array(
@@ -205,7 +205,7 @@ function _mandrill_wp_mail_headers( $headers, $message_args ) {
 			break;
 
 			case 'bcc':
-				$bcc = array_merge( (array) $bcc, explode( ',', $content ) );
+				$bcc           = explode( ',', $content );
 				$processed_bcc = array();
 				foreach ( (array) $bcc as $email ) {
 					$processed_bcc[] = array(
