@@ -106,7 +106,7 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	}
 
 	// Make sure our templates end up as HTML.
-	if ( ! empty( $message_args['headers']['Content-type'] ) && 'text/plain' === strtolower( $message_args['headers']['Content-type'] ) ) {
+	if ( ! empty( $message_args['headers']['Content-type'] ) && false !== strpos( strtolower( $message_args['headers']['Content-type'] ), 'text/plain' ) ) {
 		$message_args['html'] = wpautop( $message_args['html'] );
 	}
 
