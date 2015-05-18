@@ -47,7 +47,6 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	$message_args = array(
 		// Email
 		'subject'                    => $subject,
-		'html'                       => $message,
 		'to'                         => $to,
 		'headers'                    => array(
 			'Content-type'           => apply_filters( 'wp_mail_content_type', 'text/plain' ),
@@ -80,8 +79,14 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		'return_path_domain'         => null,
 		'subaccount'                 => null,
 		'recipient_metadata'         => null,
-		'auto_text'                  => true,
 	);
+
+	if ( $message_args['headers']['Content-type'] === 'text/plain' ) {
+		$message_args['text'] = $message;
+	} else {
+		$message_args['html'] = $message;
+		$message_args['auto_text'] = true;
+	}
 	$message_args = apply_filters( 'mandrill_wp_mail_pre_message_args', $message_args );
 
 	// Make sure our to value is an array so we can manipulate it for the API.
@@ -103,11 +108,6 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	// Set up message headers if we have any to send.
 	if ( ! empty( $headers ) ) {
 		$message_args = _mandrill_wp_mail_headers( $headers, $message_args );
-	}
-
-	// Make sure our templates end up as HTML.
-	if ( ! empty( $message_args['headers']['Content-type'] ) && false !== strpos( strtolower( $message_args['headers']['Content-type'] ), 'text/plain' ) ) {
-		$message_args['html'] = wpautop( $message_args['html'] );
 	}
 
 	// Default filters we should still apply.
