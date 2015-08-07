@@ -28,7 +28,6 @@
  * @return bool true if mail has been sent, false if it failed
  */
 function wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
-
 	// Return early if our API key hasn't been defined.
 	if ( ! defined( 'MANDRILL_API_KEY' ) ) {
 		return false;
@@ -124,8 +123,6 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 			'key'     => MANDRILL_API_KEY,
 		)
 	);
-
-	hm_log( $request_args );
 
 	$request_url = 'https://mandrillapp.com/api/1.0/messages/send.json';
 	$response = wp_remote_post( $request_url, $request_args );
