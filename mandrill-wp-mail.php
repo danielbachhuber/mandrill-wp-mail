@@ -28,6 +28,7 @@
  * @return bool true if mail has been sent, false if it failed
  */
 function wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
+
 	// Return early if our API key hasn't been defined.
 	if ( ! defined( 'MANDRILL_API_KEY' ) ) {
 		return false;
@@ -81,6 +82,11 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		'recipient_metadata'         => null,
 	);
 
+	// Set up message headers if we have any to send.
+	if ( ! empty( $headers ) ) {
+		$message_args = _mandrill_wp_mail_headers( $headers, $message_args );
+	}
+
 	if ( $message_args['headers']['Content-type'] === 'text/plain' ) {
 		$message_args['text'] = $message;
 	} else {
@@ -105,11 +111,6 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	}
 	$message_args['to'] = $processed_to;
 
-	// Set up message headers if we have any to send.
-	if ( ! empty( $headers ) ) {
-		$message_args = _mandrill_wp_mail_headers( $headers, $message_args );
-	}
-
 	// Default filters we should still apply.
 	$message_args['from_email'] = apply_filters( 'wp_mail_from', $message_args['from_email'] );
 	$message_args['from_name']  = apply_filters( 'wp_mail_from_name', $message_args['from_name'] );
@@ -123,6 +124,8 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 			'key'     => MANDRILL_API_KEY,
 		)
 	);
+
+	hm_log( $request_args );
 
 	$request_url = 'https://mandrillapp.com/api/1.0/messages/send.json';
 	$response = wp_remote_post( $request_url, $request_args );
