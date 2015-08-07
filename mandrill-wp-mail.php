@@ -81,17 +81,6 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		'recipient_metadata'         => null,
 	);
 
-	// Set up message headers if we have any to send.
-	if ( ! empty( $headers ) ) {
-		$message_args = _mandrill_wp_mail_headers( $headers, $message_args );
-	}
-
-	if ( $message_args['headers']['Content-type'] === 'text/plain' ) {
-		$message_args['text'] = $message;
-	} else {
-		$message_args['html'] = $message;
-		$message_args['auto_text'] = true;
-	}
 	$message_args = apply_filters( 'mandrill_wp_mail_pre_message_args', $message_args );
 
 	// Make sure our to value is an array so we can manipulate it for the API.
@@ -109,6 +98,18 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 		}
 	}
 	$message_args['to'] = $processed_to;
+
+	// Set up message headers if we have any to send.
+	if ( ! empty( $headers ) ) {
+		$message_args = _mandrill_wp_mail_headers( $headers, $message_args );
+	}
+
+	if ( $message_args['headers']['Content-type'] === 'text/plain' ) {
+		$message_args['text'] = $message;
+	} else {
+		$message_args['html'] = $message;
+		$message_args['auto_text'] = true;
+	}
 
 	// Default filters we should still apply.
 	$message_args['from_email'] = apply_filters( 'wp_mail_from', $message_args['from_email'] );
